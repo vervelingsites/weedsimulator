@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtuele Cannabis Lounge & Rooksimulator - VIP Edition</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        weed: {
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            900: '#052e16',
+                        },
+                        neon: {
+                            purple: '#a855f7',
+                            pink: '#ec4899',
+                            cyan: '#06b6d4',
+                            amber: '#f59e0b',
+                            gold: '#ffd700'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        heading: ['Space Grotesk', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Glassmorphism & Neon Glows */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .neon-glow-green { box-shadow: 0 0 25px rgba(34, 197, 94, 0.35); }
+        .neon-glow-gold { box-shadow: 0 0 30px rgba(255, 215, 0, 0.45); }
+        .neon-glow-red { box-shadow: 0 0 30px rgba(239, 68, 68, 0.6); }
+
+        /* Background Themes */
+        .bg-coffeeshop { background: linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.96)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80') center/cover; }
+        .bg-cosmic { background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%); }
+        .bg-sunset { background: linear-gradient(to bottom, #431407, #1e1b4b, #0f172a); }
+        .bg-lofi { background: linear-gradient(rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.92)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80') center/cover; }
+
+        /* Animations */
+        @keyframes shake-cough {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            15% { transform: translate(-8px, -6px) rotate(-2deg); }
+            30% { transform: translate(8px, 6px) rotate(2deg); }
+            45% { transform: translate(-10px, 4px) rotate(-3deg); }
+            60% { transform: translate(10px, -4px) rotate(3deg); }
+            75% { transform: translate(-5px, -5px) rotate(-1deg); }
+        }
+        .cough-shake {
+            animation: shake-cough 0.15s ease-in-out infinite;
+        }
+
+        @keyframes spin-grinder {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(720deg); }
+        }
+        .animate-grind { animation: spin-grinder 1.2s ease-in-out; }
+
+        @keyframes rotate-plate {
+            0% { transform: rotateX(55deg) rotateZ(0deg); }
+            100% { transform: rotateX(55deg) rotateZ(360deg); }
+        }
+        .microwave-plate-spin { animation: rotate-plate 2.5s linear infinite; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #22c55e; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col transition-all duration-500 overflow-x-hidden" id="app-body">
+
+    <header class="glass-panel sticky top-0 z-40 border-b border-slate-800 px-4 lg:px-8 py-3 flex justify-between items-center shadow-xl">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-2xl bg-weed-500/20 flex items-center justify-center border border-weed-500/50 text-weed-400 text-xl font-bold shadow-lg shadow-weed-500/10">
+                <i class="fa-solid fa-cannabis"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="font-heading font-bold text-lg md:text-xl tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-weed-400 via-emerald-300 to-neon-purple">
+                        HighAtmosphere VIP
+                    </h1>
+                    <span id="vip-badge" class="hidden px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold tracking-wider uppercase animate-pulse">
+                        <i class="fa-solid fa-crown text-amber-400"></i> VIP Coffeeshop Unlocked
+                    </span>
+                </div>
+                <p class="text-xs text-slate-400">Virtuele Lounge, Draai-Studio, Munchie Supermarkt & Sound SFX</p>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="hidden md:flex bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 text-xs shadow-inner">
+            <button onclick="switchTab('lounge')" id="tab-btn-lounge" class="px-4 py-2 rounded-xl bg-weed-500 text-slate-950 font-bold transition flex items-center gap-2 shadow">
+                <i class="fa-solid fa-couch"></i> Lounge & Simulator
+            </button>
+            <button onclick="switchTab('roll')" id="tab-btn-roll" class="px-4 py-2 rounded-xl text-slate-400 hover:text-white transition flex items-center gap-2">
+                <i class="fa-solid fa-joint"></i> Draai Studio
+            </button>
+            <button onclick="switchTab('market')" id="tab-btn-market" class="px-4 py-2 rounded-xl text-slate-400 hover:text-white transition flex items-center gap-2">
+                <i class="fa-solid fa-shop"></i> Munchie Supermarkt
+            </button>
+        </nav>
+
+        <!-- Right Bar: Money, Secret Code & Reset -->
+        <div class="flex items-center space-x-3">
+            <button onclick="openSecretModal()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/50 text-amber-400 text-xs font-semibold transition flex items-center gap-1.5 shadow">
+                <i class="fa-solid fa-key text-amber-400"></i>
+                <span class="hidden sm:inline">Geheim</span>
+            </button>
+
+            <div class="flex items-center gap-3 bg-slate-900/90 px-3.5 py-1.5 rounded-xl border border-slate-800 shadow-inner">
+                <div class="text-xs flex items-center gap-1.5 text-amber-400 font-bold">
+                    <i class="fa-solid fa-coins"></i>
+                    <span id="user-money">€35.00</span>
+                </div>
+                <div class="h-4 w-px bg-slate-800"></div>
+                <div class="flex flex-col items-end">
+                    <div class="text-[10px] text-slate-400 flex items-center gap-1">
+                        <span>High</span>
+                        <span id="high-percent" class="text-weed-400 font-bold">0%</span>
+                    </div>
+                    <div class="w-20 bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700">
+                        <div id="high-bar" class="bg-gradient-to-r from-weed-500 via-emerald-400 to-neon-purple h-full w-0% transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="sober-btn" class="px-3 py-1.5 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1" title="Sober worden (Reset)">
+                <i class="fa-solid fa-droplet text-cyan-400"></i>
+                <span class="hidden sm:inline">Reset</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <div class="md:hidden bg-slate-900 border-b border-slate-800 p-2 flex justify-around text-xs sticky top-[61px] z-30 shadow-md">
+        <button onclick="switchTab('lounge')" id="mob-btn-lounge" class="px-3 py-1.5 rounded-lg bg-weed-500 text-slate-950 font-bold">Lounge</button>
+        <button onclick="switchTab('roll')" id="mob-btn-roll" class="px-3 py-1.5 rounded-lg text-slate-400">Draai Studio</button>
+        <button onclick="switchTab('market')" id="mob-btn-market" class="px-3 py-1.5 rounded-lg text-slate-400">Supermarkt</button>
+    </div>
+
+    <!-- MAIN APP WRAPPER -->
+    <main class="flex-1 max-w-7xl mx-auto w-full p-4 lg:p-6 space-y-6">
+
+        <!-- ================= TAB 1: LOUNGE & SIMULATOR ================= -->
+        <div id="view-lounge" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left Column: Strains Selector (20+ Strains) -->
+            <section class="lg:col-span-3 space-y-4">
+                <div class="glass-panel rounded-2xl p-4 shadow-xl border border-slate-800 flex flex-col h-[520px]">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="font-heading font-bold text-sm text-slate-200 flex items-center gap-2">
+                            <i class="fa-solid fa-seedling text-weed-400"></i> Wiet & Hasj Menu
+                        </h2>
+                        <span id="strain-count-badge" class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700">19 Soorten</span>
+                    </div>
+
+                    <!-- Filter Tabs -->
+                    <div class="grid grid-cols-3 gap-1 bg-slate-900/90 p-1 rounded-xl mb-3 text-[11px] border border-slate-800">
+                        <button onclick="filterStrainCategory('all')" id="scat-all" class="py-1 rounded-lg bg-weed-500 text-slate-950 font-bold">Alles</button>
+                        <button onclick="filterStrainCategory('weed')" id="scat-weed" class="py-1 rounded-lg text-slate-400 hover:text-white">Wiet</button>
+                        <button onclick="filterStrainCategory('hash')" id="scat-hash" class="py-1 rounded-lg text-slate-400 hover:text-white">Hasj</button>
+                    </div>
+                    
+                    <!-- Search Input -->
+                    <div class="mb-3">
+                        <input type="text" id="strain-search" oninput="filterStrains()" placeholder="Zoek op naam of effect..." class="w-full bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-weed-500">
+                    </div>
+
+                    <!-- Scrollable Strains List -->
+                    <div class="space-y-2 flex-1 overflow-y-auto pr-1" id="strain-list">
+                        <!-- Dynamic Strains -->
+                    </div>
+                </div>
+
+                <!-- Environment & SFX Sound Controls -->
+                <div class="glass-panel rounded-2xl p-4 shadow-xl border border-slate-800 space-y-3">
+                    <h2 class="font-heading font-bold text-sm text-slate-200 flex items-center justify-between">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-sliders text-neon-purple"></i> Sfeer & Geluid</span>
+                        <span class="text-[10px] text-weed-400 font-semibold">Web Audio SFX</span>
+                    </h2>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="setTheme('cosmic')" class="p-2 text-xs rounded-xl border border-slate-800 bg-slate-900/80 hover:border-neon-purple transition flex items-center gap-2">
+                            <i class="fa-solid fa-atom text-neon-purple"></i> Cosmic
+                        </button>
+                        <button onclick="setTheme('coffeeshop')" class="p-2 text-xs rounded-xl border border-slate-800 bg-slate-900/80 hover:border-weed-500 transition flex items-center gap-2">
+                            <i class="fa-solid fa-store text-weed-400"></i> Coffee Shop
+                        </button>
+                        <button onclick="setTheme('sunset')" class="p-2 text-xs rounded-xl border border-slate-800 bg-slate-900/80 hover:border-amber-500 transition flex items-center gap-2">
+                            <i class="fa-solid fa-sun text-amber-500"></i> Sunset
+                        </button>
+                        <button onclick="setTheme('lofi')" class="p-2 text-xs rounded-xl border border-slate-800 bg-slate-900/80 hover:border-neon-pink transition flex items-center gap-2">
+                            <i class="fa-solid fa-moon text-neon-pink"></i> Lo-Fi Room
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-xs font-medium text-slate-300">Ambient Synth Soundscape</span>
+                        <button id="toggle-audio-btn" class="w-8 h-8 rounded-xl bg-weed-500 text-slate-950 font-bold flex items-center justify-center hover:scale-105 transition shadow">
+                            <i class="fa-solid fa-play text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Center Column: Smoking Simulator Canvas & Inhale Controls -->
+            <section class="lg:col-span-6 flex flex-col space-y-4">
+                <div class="glass-panel rounded-3xl p-6 relative flex-1 flex flex-col items-center justify-between min-h-[500px] overflow-hidden border border-slate-800 shadow-2xl" id="simulator-card">
+                    
+                    <!-- Cough Warning Overlay -->
+                    <div id="cough-overlay" class="absolute inset-0 bg-red-950/40 border-4 border-red-500/80 rounded-3xl z-30 pointer-events-none opacity-0 transition-opacity duration-150 flex flex-col items-center justify-center">
+                        <div class="bg-red-900/90 border border-red-500 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce">
+                            <i class="fa-solid fa-lungs-virus text-2xl text-red-300"></i>
+                            <div>
+                                <span class="font-heading font-bold text-base block">COUGH ATTACK!</span>
+                                <span class="text-xs text-red-200">Te lang ingehouden! *KUCH KUCH*</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Canvas Particle Smoke Render -->
+                    <canvas id="smokeCanvas" class="absolute inset-0 w-full h-full pointer-events-auto z-0"></canvas>
+
+                    <!-- Top Status Header -->
+                    <div class="z-10 w-full flex flex-wrap justify-between items-center gap-2">
+                        <div id="active-strain-badge" class="px-3.5 py-1.5 rounded-full bg-weed-500/10 border border-weed-500/30 text-weed-400 text-xs font-medium flex items-center gap-2 shadow">
+                            <span class="w-2.5 h-2.5 rounded-full bg-weed-400 animate-pulse"></span>
+                            <span id="current-strain-name">Amsterdam Amnesia Haze</span>
+                        </div>
+
+                        <!-- Method Selector -->
+                        <div class="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs shadow-inner">
+                            <button onclick="setMethod('joint')" id="btn-method-joint" class="px-3 py-1 rounded-lg bg-weed-500 text-slate-950 font-bold transition">Joint</button>
+                            <button onclick="setMethod('bong')" id="btn-method-bong" class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition">Bong</button>
+                            <button onclick="setMethod('vape')" id="btn-method-vape" class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition">Vape</button>
+                            <button onclick="setMethod('custom')" id="btn-method-custom" class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition hidden">Zelfgedraaid</button>
+                        </div>
+                    </div>
+
+                    <!-- Graphic Representation -->
+                    <div class="z-10 my-auto text-center flex flex-col items-center justify-center relative min-h-[220px]" id="device-container">
+                        <div id="device-graphic" class="relative transition-transform duration-300">
+                            <!-- Rendered via JS -->
+                        </div>
+                        
+                        <!-- Breath / Inhale Indicator Gauge -->
+                        <div id="breath-indicator" class="mt-4 opacity-0 transition-opacity duration-200 flex flex-col items-center">
+                            <span class="text-xs text-weed-400 font-semibold tracking-wider uppercase mb-1" id="breath-status-text">Inhaleren...</span>
+                            <div class="w-48 h-3 bg-slate-900 rounded-full border border-slate-700 overflow-hidden shadow-inner p-0.5">
+                                <div id="breath-fill" class="h-full bg-gradient-to-r from-weed-500 to-amber-400 rounded-full w-0% transition-all duration-75"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Inhale Button -->
+                    <div class="z-10 w-full flex flex-col items-center space-y-2">
+                        <button id="inhale-btn" class="w-full sm:w-80 py-4 px-6 rounded-2xl bg-gradient-to-r from-weed-600 via-weed-500 to-emerald-500 hover:from-weed-500 hover:to-emerald-400 text-slate-950 font-heading font-bold text-lg shadow-xl hover:shadow-weed-500/20 active:scale-95 transition-all duration-150 flex items-center justify-center gap-3 border border-weed-400/40 select-none cursor-pointer">
+                            <i class="fa-solid fa-wind text-xl"></i>
+                            <span>INHALEER (HOUD VAST)</span>
+                        </button>
+                        <p class="text-[11px] text-slate-400 text-center">Houd ingedrukt om te inhaleren. Niet langer dan 3.5 sec of je gaat hoesten!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column: Strain Info & Stoner Thought -->
+            <section class="lg:col-span-3 space-y-4">
+                <div class="glass-panel rounded-2xl p-4 shadow-xl border border-slate-800" id="strain-details-card">
+                    <!-- Dynamic details -->
+                </div>
+
+                <div class="glass-panel rounded-2xl p-4 shadow-xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-heading font-bold text-sm text-slate-200 flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb text-amber-400"></i> Stoner Thought
+                        </h2>
+                        <button onclick="generateThought()" class="text-xs text-weed-400 hover:underline">Volgende</button>
+                    </div>
+                    <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800/80 min-h-[90px] flex items-center">
+                        <p id="thought-text" class="text-xs italic text-slate-300 leading-relaxed">
+                            "Als een rups verandert in een vlinder, herinnert hij zich dan zijn leven als rups?"
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= TAB 2: INTERACTIEVE DRAAI STUDIO ================= -->
+        <div id="view-roll" class="hidden max-w-4xl mx-auto">
+            <div class="glass-panel rounded-3xl p-6 shadow-2xl border border-slate-800 space-y-6">
+                
+                <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="font-heading font-bold text-xl text-slate-100 flex items-center gap-2">
+                            <i class="fa-solid fa-joint text-weed-400"></i> Joint Draai Studio
+                        </h2>
+                        <p class="text-xs text-slate-400">Doorloop alle stappen en rol je eigen unieke joint met je gekozen soort!</p>
+                    </div>
+                    <span id="roll-step-badge" class="px-3.5 py-1 rounded-full bg-weed-500/20 text-weed-400 border border-weed-500/30 font-bold text-xs">
+                        Stap 1/5: Vloei Kiezen
+                    </span>
+                </div>
+
+                <!-- Interactive Workstation Canvas -->
+                <div class="bg-slate-950/90 rounded-2xl border border-slate-800 p-8 min-h-[300px] flex flex-col items-center justify-center relative overflow-hidden shadow-inner" id="roll-workstation">
+                    
+                    <!-- Step 1: Papers -->
+                    <div id="roll-step-1" class="w-full flex flex-col items-center gap-4">
+                        <span class="text-sm text-slate-300 font-semibold">1. Kies je favoriete vloeitje:</span>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-lg">
+                            <button onclick="selectPaper('King Size Normal', '#f8fafc')" class="p-4 rounded-xl bg-slate-900 border border-slate-700 hover:border-weed-500 flex flex-col items-center gap-2 transition group shadow">
+                                <div class="w-16 h-6 bg-slate-200 rounded border border-slate-400 group-hover:scale-105 transition"></div>
+                                <span class="text-xs font-medium">Standard White</span>
+                            </button>
+                            <button onclick="selectPaper('Unbleached Hemp', '#d97706')" class="p-4 rounded-xl bg-slate-900 border border-slate-700 hover:border-weed-500 flex flex-col items-center gap-2 transition group shadow">
+                                <div class="w-16 h-6 bg-amber-700/80 rounded border border-amber-600 group-hover:scale-105 transition"></div>
+                                <span class="text-xs font-medium">Organic Hemp</span>
+                            </button>
+                            <button onclick="selectPaper('Pink Edition', '#ec4899')" class="p-4 rounded-xl bg-slate-900 border border-slate-700 hover:border-weed-500 flex flex-col items-center gap-2 transition group shadow">
+                                <div class="w-16 h-6 bg-pink-400 rounded border border-pink-300 group-hover:scale-105 transition"></div>
+                                <span class="text-xs font-medium">Pink Slim</span>
+                            </button>
+                            <button onclick="selectPaper('Transparent Cellulose', '#38bdf8')" class="p-4 rounded-xl bg-slate-900 border border-slate-700 hover:border-weed-500 flex flex-col items-center gap-2 transition group shadow">
+                                <div class="w-16 h-6 bg-cyan-400/40 rounded border border-cyan-300 group-hover:scale-105 transition"></div>
+                                <span class="text-xs font-medium">Clear Glass</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Tip Style -->
+                    <div id="roll-step-2" class="hidden w-full flex flex-col items-center gap-4">
+                        <span class="text-sm text-slate-300 font-semibold">2. Vouw & rol je tippetje:</span>
+                        <div class="flex items-center gap-6">
+                            <div id="tip-visual" class="w-14 h-14 rounded-full bg-amber-700 border-2 border-amber-400 flex items-center justify-center font-bold text-amber-100 text-xl transition-transform duration-300 shadow-lg">
+                                M
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <button onclick="rollTipStyle('M-Tip')" class="px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl hover:border-weed-500 text-xs text-left">
+                                    <span class="font-bold text-weed-400 block">Klassiek M-Vouw</span>
+                                    <span class="text-slate-400 text-[10px]">Optimale luchtstroom & bescherming</span>
+                                </button>
+                                <button onclick="rollTipStyle('Spiral-Tip')" class="px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl hover:border-weed-500 text-xs text-left">
+                                    <span class="font-bold text-weed-400 block">Spiraal Tip</span>
+                                    <span class="text-slate-400 text-[10px]">Strak opgerold voor stevigheid</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Grinder -->
+                    <div id="roll-step-3" class="hidden w-full flex flex-col items-center gap-4">
+                        <span class="text-sm text-slate-300 font-semibold">3. Grind de gekozen soort (<span id="roll-strain-name" class="text-weed-400">Amnesia</span>):</span>
+                        <div class="flex flex-col items-center gap-3">
+                            <div id="grinder-disc" class="w-28 h-28 rounded-full bg-slate-800 border-4 border-weed-500 flex items-center justify-center text-4xl text-weed-400 shadow-2xl cursor-pointer hover:scale-105 transition" onclick="grindWeedAnimation()">
+                                <i class="fa-solid fa-gear"></i>
+                            </div>
+                            <p class="text-xs text-slate-400">Klik op de grinder om te malen!</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Spreading -->
+                    <div id="roll-step-4" class="hidden w-full flex flex-col items-center gap-4">
+                        <span class="text-sm text-slate-300 font-semibold">4. Verdeel de gemalen mix gelijkmatig:</span>
+                        <div class="w-80 h-16 bg-slate-200 rounded-lg relative overflow-hidden border border-slate-400 p-2 flex items-center justify-between shadow-inner">
+                            <div id="paper-tip-placed" class="w-8 h-10 bg-amber-700 rounded text-[9px] text-white font-bold flex items-center justify-center shadow">TIP</div>
+                            <div id="paper-weed-mix" class="flex-1 h-8 mx-2 bg-amber-900/40 rounded-full transition-all duration-300 opacity-0 flex items-center justify-center text-[10px] text-weed-300 font-bold">
+                                🌿 Gemalen Mix
+                            </div>
+                        </div>
+                        <button onclick="spreadMix()" class="px-5 py-2.5 bg-weed-500 text-slate-950 font-bold rounded-xl text-xs hover:bg-weed-400 transition shadow">
+                            Strooi Mix op Vloei
+                        </button>
+                    </div>
+
+                    <!-- Step 5: Roll & Light -->
+                    <div id="roll-step-5" class="hidden w-full flex flex-col items-center gap-4 text-center">
+                        <span class="text-sm text-slate-300 font-semibold">5. Rol dicht & steek aan!</span>
+                        <div id="finished-joint-preview" class="w-72 h-8 bg-slate-100 rounded-full border border-slate-300 relative flex items-center px-2 shadow-xl">
+                            <div class="w-6 h-6 bg-amber-700 rounded-full text-[8px] text-white flex items-center justify-center font-bold">TIP</div>
+                            <div class="flex-1 text-center text-xs font-bold text-slate-800" id="joint-final-label">Custom Joint</div>
+                            <div id="joint-fire" class="w-4 h-4 bg-red-500 rounded-full animate-ping opacity-0"></div>
+                        </div>
+                        <button onclick="lightJoint()" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-red-500 text-white font-bold rounded-2xl text-sm hover:scale-105 transition flex items-center gap-2 shadow-xl">
+                            <i class="fa-solid fa-fire"></i> Steek Aan met Aansteker
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="flex justify-between items-center pt-2">
+                    <button onclick="resetRollStudio()" class="px-4 py-2 rounded-xl bg-slate-900 text-slate-400 hover:text-white border border-slate-800 text-xs">
+                        Opnieuw Beginnen
+                    </button>
+                    <span id="roll-status-text" class="text-xs text-weed-400 font-medium">Stap 1: Kies je vloeitje.</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: MUNCHIE SUPERMARKT & MAGNETRON ================= -->
+        <div id="view-market" class="hidden space-y-6">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left 8 Cols: Catalogus -->
+                <div class="lg:col-span-8 space-y-4">
+                    <div class="glass-panel rounded-2xl p-4 border border-slate-800 flex justify-between items-center shadow-xl">
+                        <div>
+                            <h2 class="font-heading font-bold text-lg text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-store text-amber-400"></i> Munchie Nachtwinkel (20+ Items)
+                            </h2>
+                            <p class="text-xs text-slate-400">Koude frisdranken, zoete snacks en op te warmen magnetron maaltijden!</p>
+                        </div>
+                        <button onclick="addMoney()" class="px-3.5 py-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold hover:bg-amber-500/30 transition shadow">
+                            + €10.00 Pinnen
+                        </button>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="flex gap-2 overflow-x-auto pb-1 text-xs">
+                        <button onclick="filterMarket('all')" id="mcat-all" class="px-3.5 py-1.5 rounded-xl bg-weed-500 text-slate-950 font-bold whitespace-nowrap">Alles</button>
+                        <button onclick="filterMarket('drinks')" id="mcat-drinks" class="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 whitespace-nowrap">Drankjes (9)</button>
+                        <button onclick="filterMarket('snacks')" id="mcat-snacks" class="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 whitespace-nowrap">Snacks & Candy (8)</button>
+                        <button onclick="filterMarket('meals')" id="mcat-meals" class="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 whitespace-nowrap">Magnetron Maaltijden (5)</button>
+                    </div>
+
+                    <!-- Products Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="market-products-grid">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Right 4 Cols: Microwave Kitchen -->
+                <div class="lg:col-span-4 space-y-4">
+                    <div class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-4 shadow-xl">
+                        <h2 class="font-heading font-bold text-base text-slate-200 flex items-center gap-2">
+                            <i class="fa-solid fa-kitchen-set text-red-400"></i> Interactive Magnetron
+                        </h2>
+
+                        <!-- Microwave Device Window -->
+                        <div class="bg-slate-900 rounded-2xl border-4 border-slate-800 p-4 shadow-2xl relative">
+                            <div class="w-full h-44 bg-slate-950 rounded-xl border-2 border-slate-800 relative flex items-center justify-center overflow-hidden">
+                                <!-- Interior Light -->
+                                <div id="micro-light" class="absolute inset-0 bg-amber-400/20 opacity-0 transition-opacity"></div>
+                                
+                                <!-- Rotating Glass Plate -->
+                                <div class="w-36 h-20 border border-slate-700/60 rounded-full flex items-center justify-center relative">
+                                    <div id="micro-food-item" class="text-3xl transition-transform duration-300">
+                                        🍟
+                                    </div>
+                                </div>
+
+                                <!-- Steam Animation Overlay -->
+                                <div id="micro-steam" class="absolute inset-0 flex justify-center items-center opacity-0 pointer-events-none transition-opacity">
+                                    <span class="text-2xl animate-ping">♨️</span>
+                                </div>
+                            </div>
+
+                            <!-- Digital Display & Controls -->
+                            <div class="mt-3 flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                                <div class="bg-black px-3 py-1 rounded border border-green-500/50 text-weed-400 font-mono text-base font-bold tracking-widest shadow-inner" id="micro-timer">
+                                    00:30
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <button onclick="setMicroTime(30)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg text-slate-300 font-bold border border-slate-700">+30s</button>
+                                    <button onclick="startMicrowave()" id="micro-start-btn" class="px-3 py-1 bg-weed-500 hover:bg-weed-400 text-slate-950 text-xs rounded-lg font-bold shadow">START</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Munchies Satisfaction -->
+                        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-xs space-y-1.5 shadow-inner">
+                            <div class="flex justify-between font-medium">
+                                <span class="text-slate-400">Munchie Voldoening:</span>
+                                <span id="munchie-level-text" class="text-amber-400 font-bold">0%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-700">
+                                <div id="munchie-bar" class="bg-gradient-to-r from-amber-500 to-amber-300 h-full w-0% transition-all duration-300"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- SECRET COFFEESHOP VIP MODAL -->
+    <div id="secret-modal" class="fixed inset-0 bg-slate-950/80 backdrop-filter backdrop-blur-md z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass-panel border-2 border-amber-500/50 max-w-md w-full rounded-3xl p-6 shadow-2xl text-center space-y-4 relative">
+            <button onclick="closeSecretModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="w-14 h-14 bg-amber-500/20 border border-amber-500/50 rounded-2xl flex items-center justify-center text-amber-400 text-2xl mx-auto shadow-lg">
+                <i class="fa-solid fa-user-secret"></i>
+            </div>
+
+            <h3 class="font-heading font-bold text-lg text-slate-100">Geheime Coffeeshop VIP Access</h3>
+            <p class="text-xs text-slate-400">Voer de geheime code in om zeldzame exotische soorten (Moonrocks, Sunrocks, Gelato 41) te ontgrendelen!</p>
+
+            <div class="space-y-2">
+                <input type="text" id="secret-code-input" placeholder="Typ bijv: COFFEESHOP." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-center font-mono text-sm text-amber-300 focus:outline-none focus:border-amber-500 uppercase tracking-widest">
+                <button onclick="submitSecretCode()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-bold text-xs hover:scale-105 transition shadow-lg">
+                    Ontgrendel VIP Backroom
+                </button>
+            </div>
+            <p id="secret-error" class="text-xs text-red-400 hidden">Ongeldige code! Hint: Typ "COFFEESHOP." in.</p>
+        </div>
+    </div>
+
+    <script>
+        /* ====================================================
+           1. COMPREHENSIVE DATA: STRAINS & MUNCHIES
+           ==================================================== */
+        const STRAINS = [
+            // Standard Strains
+            { id: 'amnesia', name: 'Amsterdam Amnesia Haze', category: 'weed', type: 'Sativa', thc: '22%', cbd: '0.1%', ratio: '80% Sativa / 20% Indica', color: '#22c55e', isVip: false, desc: 'Legendarische Amsterdamse Haze met een heerlijke frisse citrussmaak.' },
+            { id: 'northern', name: 'Northern Lights', category: 'weed', type: 'Indica', thc: '19%', cbd: '0.5%', ratio: '90% Indica / 10% Sativa', color: '#3b82f6', isVip: false, desc: 'Klassieke zuivere Indica voor volledige lichamelijke rust.' },
+            { id: 'superlemon', name: 'Super Lemon Haze', category: 'weed', type: 'Sativa', thc: '21%', cbd: '0.2%', ratio: '70% Sativa / 30% Indica', color: '#eab308', isVip: false, desc: 'Meervoudig Cup-winnaar met krachtige citroenaroma’s.' },
+            { id: 'granddaddy', name: 'Granddaddy Purple', category: 'weed', type: 'Indica', thc: '23%', cbd: '0.1%', ratio: '80% Indica / 20% Sativa', color: '#a855f7', isVip: false, desc: 'Prachtige paarse toppen met een zoete bessensmaak.' },
+            { id: 'gorilla', name: 'Gorilla Glue #4', category: 'weed', type: 'Hybride', thc: '26%', cbd: '0.1%', ratio: '50% Indica / 50% Sativa', color: '#16a34a', isVip: false, desc: 'Extreem krachtige hybride met plakkerige harsrijke toppen.' },
+            { id: 'gelato33', name: 'Gelato #33', category: 'weed', type: 'Hybride', thc: '25%', cbd: '0.1%', ratio: '55% Indica / 45% Sativa', color: '#ec4899', isVip: false, desc: 'Heerlijk zoet smaakprofiel dat doet denken aan vers fruitijs.' },
+            { id: 'ogkush', name: 'OG Kush', category: 'weed', type: 'Hybride', thc: '24%', cbd: '0.2%', ratio: '55% Sativa / 45% Indica', color: '#84cc16', isVip: false, desc: 'De wereldbekende Californische stam met uniek brandstof-aroma.' },
+            { id: 'cookies', name: 'Girl Scout Cookies', category: 'weed', type: 'Hybride', thc: '23%', cbd: '0.2%', ratio: '60% Indica / 40% Sativa', color: '#f59e0b', isVip: false, desc: 'Zoete koekjesaroma’s met een snelle en langdurige werking.' },
+            { id: 'whitewidow', name: 'White Widow', category: 'weed', type: 'Hybride', thc: '20%', cbd: '0.3%', ratio: '50% Sativa / 50% Indica', color: '#cbd5e1', isVip: false, desc: 'De bekende Nederlandse klassieker vol witte kristallen.' },
+            { id: 'weddingcake', name: 'Wedding Cake', category: 'weed', type: 'Indica', thc: '24%', cbd: '0.1%', ratio: '60% Indica / 40% Sativa', color: '#f472b6', isVip: false, desc: 'Rijke vanille smaak met een ontspannende body-high.' },
+            { id: 'jackherer', name: 'Jack Herer', category: 'weed', type: 'Sativa', thc: '21%', cbd: '0.2%', ratio: '55% Sativa / 45% Indica', color: '#10b981', isVip: false, desc: 'Heldere cerebrale high genoemd naar de legendarische hennep-activist.' },
+            { id: 'purplehaze', name: 'Purple Haze', category: 'weed', type: 'Sativa', thc: '20%', cbd: '0.1%', ratio: '85% Sativa / 15% Indica', color: '#c084fc', isVip: false, desc: 'Geestverruimende sativa met paarse tinten.' },
+            { id: 'zkittlez', name: 'Zkittlez', category: 'weed', type: 'Indica', thc: '22%', cbd: '0.1%', ratio: '70% Indica / 30% Sativa', color: '#f43f5e', isVip: false, desc: 'Explosie van snoepsmaak en fruitige terpenen.' },
+            { id: 'durbanpoison', name: 'Durban Poison', category: 'weed', type: 'Sativa', thc: '19%', cbd: '0.1%', ratio: '100% Sativa', color: '#06b6d4', isVip: false, desc: 'Puur Afrikaanse sativa met een energieke oppepper.' },
+            
+            // Hash Strains
+            { id: 'zerozero', name: 'Moroccan Zero Zero', category: 'hash', type: 'Hasj', thc: '25%', cbd: '0.9%', ratio: 'Top Zeving Hasj', color: '#d97706', isVip: false, desc: 'Eerste zeving Marokkaanse top-hasj.' },
+            { id: 'afghan', name: 'Afghan Super Hash', category: 'hash', type: 'Hasj', thc: '24%', cbd: '1.2%', ratio: '100% Indica Hasj', color: '#78350f', isVip: false, desc: 'Traditionele donkere afghaan met kruidnagel aroma.' },
+            { id: 'nepali', name: 'Nepali Temple Ball', category: 'hash', type: 'Hasj', thc: '26%', cbd: '1.5%', ratio: 'Handgerolde Hasj', color: '#451a03', isVip: false, desc: 'Zeldzame Nepalese handgerolde harsbal.' },
+            { id: 'superpolm', name: 'Super Polm Hasj', category: 'hash', type: 'Hasj', thc: '21%', cbd: '0.8%', ratio: 'Blonde Hasj', color: '#b45309', isVip: false, desc: 'Milde blonde stuifmeel-hasj uit het Rifgebergte.' },
+            { id: 'caramello', name: 'Caramello Hasj', category: 'hash', type: 'Hasj', thc: '23%', cbd: '1.0%', ratio: 'Zoete Hasj', color: '#92400e', isVip: false, desc: 'Zachte, kneedbare hasj met karamel-achtige tonen.' },
+
+            // VIP SECRET COFFEESHOP STRAINS
+            { id: 'moonrocks', name: 'VIP Moonrocks', category: 'weed', type: 'Exotisch', thc: '50%', cbd: '1.0%', ratio: 'Weed + Olie + Kief', color: '#ffd700', isVip: true, desc: 'Toptoppen gedoopt in wietolie en gedompeld in kief! Extreem krachtig.' },
+            { id: 'sunrocks', name: 'VIP Sunrocks', category: 'weed', type: 'Exotisch', thc: '60%', cbd: '0.5%', ratio: 'Pure Concentraat', color: '#f59e0b', isVip: true, desc: 'OG Kush toppen doordrenkt met geconcentreerd extract.' },
+            { id: 'alienog', name: 'VIP Alien OG', category: 'weed', type: 'Exotisch', thc: '28%', cbd: '0.2%', ratio: 'Alien Kush x Tahoe OG', color: '#a3e635', isVip: true, desc: 'Buitenaardse potente strain met citroen-diesel aroma.' },
+            { id: 'gelato41', name: 'VIP Gelato 41 x Runtz', category: 'weed', type: 'Exotisch', thc: '29%', cbd: '0.1%', ratio: 'Cali Import', color: '#ec4899', isVip: true, desc: 'Echte Cali import met paarse kristallen en snoepsmaak.' },
+            { id: 'redleb', name: 'VIP Red Lebanese Hash', category: 'hash', type: 'Exotisch', thc: '30%', cbd: '2.0%', ratio: 'Rode Hasj', color: '#dc2626', isVip: true, desc: 'Klassieke rode Libanese gefermenteerde top-hasj.' },
+            { id: 'buddha', name: 'VIP Laughing Buddha', category: 'weed', type: 'Exotisch', thc: '22%', cbd: '0.4%', ratio: 'Sativa Cup Winner', color: '#facc15', isVip: true, desc: 'Garandeert lachkicks en onstuitbare vrolijkheid.' }
+        ];
+
+        const PRODUCTS = [
+            // Drankjes (9)
+            { id: 'chocomel', name: 'Koude Chocomel', category: 'drinks', price: 2.50, icon: '🧃', satisfaction: 25, isMicrowaveable: false, soundType: 'drink' },
+            { id: 'aadrink', name: 'AA Drink High Energy', category: 'drinks', price: 2.00, icon: '🍾', satisfaction: 20, isMicrowaveable: false, soundType: 'drink' },
+            { id: 'fernandes', name: 'Fernandes Rood (Cherry)', category: 'drinks', price: 2.20, icon: '🥤', satisfaction: 22, isMicrowaveable: false, soundType: 'drink' },
+            { id: 'redbull', name: 'Red Bull Energy', category: 'drinks', price: 2.80, icon: '⚡', satisfaction: 25, isMicrowaveable: false, soundType: 'drink' },
+            { id: 'monster', name: 'Monster Energy Ultra', category: 'drinks', price: 3.00, icon: '🟢', satisfaction: 28, isMicrowaveable: false, soundType: 'drink' },
+            { id: 'aloevera', name: 'Aloe Vera Drink', category: 'drinks', price: 2.60, icon: '🌿', satisfaction: 20, isMicrowaveable: false, soundType: 'drink' },
+            { id: 'icetea', name: 'Lipton Ice Tea Peach', category: 'drinks', price: 2.20, icon: '🍑', satisfaction: 18, isMicrowaveable: false, soundType: 'drink' },
+            { id: 'melk', name: 'Verse Volle Melk (Anti Bad-Trip)', category: 'drinks', price: 1.50, icon: '🥛', satisfaction: 30, isMicrowaveable: false, soundType: 'drink' },
+            { id: 'greentea', name: 'Lipton Green Tea', category: 'drinks', price: 2.20, icon: '🍵', satisfaction: 18, isMicrowaveable: false, soundType: 'drink' },
+
+            // Snacks & Candy (8)
+            { id: 'doritos', name: 'Doritos Nacho Cheese', category: 'snacks', price: 2.80, icon: '📐', satisfaction: 30, isMicrowaveable: false, soundType: 'crunch' },
+            { id: 'lays', name: 'Lays Paprika Chips', category: 'snacks', price: 2.50, icon: '🥔', satisfaction: 28, isMicrowaveable: false, soundType: 'crunch' },
+            { id: 'spacecake', name: 'Space Cake Slice', category: 'snacks', price: 6.50, icon: '🍰', satisfaction: 50, isMicrowaveable: false, soundType: 'crunch' },
+            { id: 'bueno', name: 'Kinder Bueno', category: 'snacks', price: 1.80, icon: '🍫', satisfaction: 25, isMicrowaveable: false, soundType: 'crunch' },
+            { id: 'stroopwafel', name: 'Warme Stroopwafels', category: 'snacks', price: 2.00, icon: '🧇', satisfaction: 25, isMicrowaveable: true, soundType: 'crunch' },
+            { id: 'gummybears', name: 'Haribo Gummy Bears', category: 'snacks', price: 2.20, icon: '🧸', satisfaction: 20, isMicrowaveable: false, soundType: 'crunch' },
+            { id: 'snickers', name: 'Snickers King Size', category: 'snacks', price: 1.80, icon: '🥜', satisfaction: 24, isMicrowaveable: false, soundType: 'crunch' },
+            { id: 'benjerry', name: 'Ben & Jerry Cookie Dough', category: 'snacks', price: 5.50, icon: '🍨', satisfaction: 45, isMicrowaveable: false, soundType: 'crunch' },
+
+            // Magnetron Maaltijden (5)
+            { id: 'kapsalon', name: 'Doner Kapsalon Large', category: 'meals', price: 8.50, icon: '🍟', satisfaction: 75, isMicrowaveable: true, soundType: 'crunch' },
+            { id: 'pizza', name: 'Diepvries Pizza Pepperoni', category: 'meals', price: 4.50, icon: '🍕', satisfaction: 60, isMicrowaveable: true, soundType: 'crunch' },
+            { id: 'babipangang', name: 'Babi Pangang + Nasi', category: 'meals', price: 9.00, icon: '🍱', satisfaction: 80, isMicrowaveable: true, soundType: 'crunch' },
+            { id: 'frikandel', name: 'Frikandelbroodje (2x)', category: 'meals', price: 3.00, icon: '🥐', satisfaction: 45, isMicrowaveable: true, soundType: 'crunch' },
+            { id: 'shoarma', name: 'Pitabroodje Shoarma', category: 'meals', price: 6.00, icon: '🥙', satisfaction: 65, isMicrowaveable: true, soundType: 'crunch' }
+        ];
+
+        const THOUGHTS = [
+            "Als een rups verandert in een vlinder, herinnert hij zich dan zijn leven als rups?",
+            "Muziek is eigenlijk gewoon trillende lucht die onze hersenen blij maakt.",
+            "Water is het enige ingrediënt waar alles op aarde naar verlangt.",
+            "Is de spiegel een portaal naar een wereld waar alles precies in spiegelbeeld staat?",
+            "Bomen praten heel langzaam met elkaar via de wortels onder de grond.",
+            "Wat als honden ons zien als magische wezens omdat wij de deuren voor ze openen?"
+        ];
+
+        /* ====================================================
+           2. PROCEDURAL SYNTHESIZED SOUND EFFECTS (WEB AUDIO)
+           ==================================================== */
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // Inhale / Smoke Sound (Noise + Lowpass Filter)
+        function playInhaleSFX() {
+            try {
+                const ctx = getAudioContext();
+                const bufferSize = ctx.sampleRate * 0.4;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = ctx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 600;
+                filter.Q.value = 3.0;
+
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(ctx.destination);
+
+                noise.start();
+            } catch(e){}
+        }
+
+        // Exhale Sound (Soft Wind / White Noise)
+        function playExhaleSFX() {
+            try {
+                const ctx = getAudioContext();
+                const bufferSize = ctx.sampleRate * 0.8;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(200, ctx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.4);
+
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(ctx.destination);
+
+                noise.start();
+            } catch(e){}
+        }
+
+        // Bong Bubbling SFX
+        function playBongSFX() {
+            try {
+                const ctx = getAudioContext();
+                for(let i=0; i<6; i++) {
+                    setTimeout(() => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(150 + Math.random() * 150, ctx.currentTime);
+                        osc.frequency.exponentialRampToValueAtTime(400 + Math.random() * 200, ctx.currentTime + 0.08);
+
+                        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start();
+                        osc.stop(ctx.currentTime + 0.08);
+                    }, i * 70);
+                }
+            } catch(e){}
+        }
+
+        // Cough Sound SFX (Procedural Cough Attack)
+        function playCoughSFX() {
+            try {
+                const ctx = getAudioContext();
+                // 3 quick cough bursts
+                [0, 180, 360].forEach((delay) => {
+                    setTimeout(() => {
+                        const bufferSize = ctx.sampleRate * 0.12;
+                        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                        const data = buffer.getChannelData(0);
+                        for (let i = 0; i < bufferSize; i++) {
+                            data[i] = Math.random() * 2 - 1;
+                        }
+
+                        const noise = ctx.createBufferSource();
+                        noise.buffer = buffer;
+
+                        const filter = ctx.createBiquadFilter();
+                        filter.type = 'bandpass';
+                        filter.frequency.value = 350 + Math.random() * 100;
+                        filter.Q.value = 1.5;
+
+                        const gain = ctx.createGain();
+                        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+
+                        noise.connect(filter);
+                        filter.connect(gain);
+                        gain.connect(ctx.destination);
+
+                        noise.start();
+                    }, delay);
+                });
+            } catch(e){}
+        }
+
+        // Crunch / Eat SFX
+        function playEatSFX() {
+            try {
+                const ctx = getAudioContext();
+                [0, 120, 240].forEach((delay) => {
+                    setTimeout(() => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(180 + Math.random()*80, ctx.currentTime);
+                        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.06);
+                        osc.connect(gain); gain.connect(ctx.destination);
+                        osc.start(); osc.stop(ctx.currentTime + 0.06);
+                    }, delay);
+                });
+            } catch(e){}
+        }
+
+        // Drink / Slurp SFX
+        function playDrinkSFX() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.25, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 0.3);
+            } catch(e){}
+        }
+
+        // Microwave Beep / Ping SFX
+        function playMicrowaveBeep() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1000, ctx.currentTime);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 0.15);
+            } catch(e){}
+        }
+
+        function playMicrowavePing() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1400, ctx.currentTime);
+                gain.gain.setValueAtTime(0.35, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 0.8);
+            } catch(e){}
+        }
+
+        /* ====================================================
+           3. STATE MANAGEMENT
+           ==================================================== */
+        let isVipUnlocked = false;
+        let currentStrain = STRAINS[0];
+        let currentMethod = 'joint';
+        let highnessLevel = 0;
+        let munchieSatisfaction = 0;
+        let userMoney = 35.00;
+        
+        let isInhaling = false;
+        let inhaleProgress = 0;
+        let inhaleTimer = null;
+        let inhaleStartTime = 0;
+
+        let activeStrainCategory = 'all';
+        let activeMarketCategory = 'all';
+
+        // Roll Studio state
+        let rollState = {
+            step: 1,
+            paperName: 'Standard White',
+            paperColor: '#f8fafc',
+            tipStyle: 'M-Tip',
+            isGround: false
+        };
+
+        // Microwave state
+        let selectedMicrowaveItem = PRODUCTS.find(p => p.id === 'kapsalon');
+        let microTimerSeconds = 30;
+        let isMicrowaveRunning = false;
+        let microInterval = null;
+
+        /* ====================================================
+           4. INITIALIZATION & TABS
+           ==================================================== */
+        window.addEventListener('load', () => {
+            renderStrainList();
+            selectStrain(STRAINS[0].id);
+            updateDeviceGraphic();
+            initSmokeCanvas();
+            renderMarketProducts('all');
+            updateMicrowaveDisplay();
+        });
+
+        function switchTab(tab) {
+            document.getElementById('view-lounge').classList.add('hidden');
+            document.getElementById('view-roll').classList.add('hidden');
+            document.getElementById('view-market').classList.add('hidden');
+
+            ['lounge', 'roll', 'market'].forEach(t => {
+                const btn = document.getElementById(`tab-btn-${t}`);
+                const mobBtn = document.getElementById(`mob-btn-${t}`);
+                if (t === tab) {
+                    if (btn) btn.className = "px-4 py-2 rounded-xl bg-weed-500 text-slate-950 font-bold transition flex items-center gap-2 shadow";
+                    if (mobBtn) mobBtn.className = "px-3 py-1.5 rounded-lg bg-weed-500 text-slate-950 font-bold";
+                } else {
+                    if (btn) btn.className = "px-4 py-2 rounded-xl text-slate-400 hover:text-white transition flex items-center gap-2";
+                    if (mobBtn) mobBtn.className = "px-3 py-1.5 rounded-lg text-slate-400";
+                }
+            });
+
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            if (tab === 'lounge') resizeCanvas();
+        }
+
+        /* ====================================================
+           5. STRAINS LIST & SECRET COFFEESHOP
+           ==================================================== */
+        function renderStrainList(filterText = '') {
+            const container = document.getElementById('strain-list');
+            let list = STRAINS.filter(s => !s.isVip || isVipUnlocked);
+
+            if (activeStrainCategory !== 'all') {
+                list = list.filter(s => s.category === activeStrainCategory);
+            }
+
+            if (filterText) {
+                list = list.filter(s => 
+                    s.name.toLowerCase().includes(filterText.toLowerCase()) ||
+                    s.type.toLowerCase().includes(filterText.toLowerCase())
+                );
+            }
+
+            document.getElementById('strain-count-badge').innerText = `${list.length} Soorten`;
+
+            container.innerHTML = list.map(s => `
+                <button onclick="selectStrain('${s.id}')" id="strain-btn-${s.id}" class="w-full text-left p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800/80 transition flex items-center justify-between group shadow-sm">
+                    <div class="flex items-center space-x-2.5 truncate">
+                        <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${s.color}"></span>
+                        <span class="text-xs font-semibold text-slate-200 truncate ${s.isVip ? 'text-amber-300 font-bold' : ''}">${s.name}</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        ${s.isVip ? '<span class="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/30">VIP</span>' : ''}
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">${s.type}</span>
+                    </div>
+                </button>
+            `).join('');
+        }
+
+        function filterStrainCategory(cat) {
+            activeStrainCategory = cat;
+            ['all', 'weed', 'hash'].forEach(c => {
+                const btn = document.getElementById(`scat-${c}`);
+                if (c === cat) btn.className = "py-1 rounded-lg bg-weed-500 text-slate-950 font-bold";
+                else btn.className = "py-1 rounded-lg text-slate-400 hover:text-white";
+            });
+            renderStrainList(document.getElementById('strain-search').value);
+        }
+
+        function filterStrains() {
+            renderStrainList(document.getElementById('strain-search').value);
+        }
+
+        function selectStrain(id) {
+            currentStrain = STRAINS.find(s => s.id === id);
+            
+            STRAINS.forEach(s => {
+                const btn = document.getElementById(`strain-btn-${s.id}`);
+                if (btn) {
+                    if (s.id === id) btn.classList.add('border-weed-500', 'bg-weed-500/20');
+                    else btn.classList.remove('border-weed-500', 'bg-weed-500/20');
+                }
+            });
+
+            document.getElementById('current-strain-name').innerText = currentStrain.name;
+            document.getElementById('roll-strain-name').innerText = currentStrain.name;
+
+            const detailsCard = document.getElementById('strain-details-card');
+            detailsCard.innerHTML = `
+                <div class="flex items-center justify-between mb-1.5">
+                    <h3 class="font-heading font-bold text-sm text-slate-200 flex items-center gap-1.5">
+                        ${currentStrain.name}
+                        ${currentStrain.isVip ? '<i class="fa-solid fa-crown text-amber-400 text-xs"></i>' : ''}
+                    </h3>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-weed-500/20 text-weed-400 border border-weed-500/30">${currentStrain.type}</span>
+                </div>
+                <p class="text-xs text-slate-400 mb-2 leading-relaxed">${currentStrain.desc}</p>
+                <div class="grid grid-cols-2 gap-2 text-xs mb-2">
+                    <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                        <span class="text-slate-500 text-[9px] block">THC Gehalte</span>
+                        <span class="font-bold text-weed-400 text-xs">${currentStrain.thc}</span>
+                    </div>
+                    <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                        <span class="text-slate-500 text-[9px] block">CBD Gehalte</span>
+                        <span class="font-bold text-cyan-400 text-xs">${currentStrain.cbd}</span>
+                    </div>
+                </div>
+                <div class="text-[10px] text-slate-400">
+                    <span class="text-slate-500">Ratio:</span> ${currentStrain.ratio}
+                </div>
+            `;
+            updateDeviceGraphic();
+        }
+
+        /* SECRET MODAL LOGIC */
+        function openSecretModal() {
+            const modal = document.getElementById('secret-modal');
+            modal.classList.remove('pointer-events-none', 'opacity-0');
+        }
+
+        function closeSecretModal() {
+            const modal = document.getElementById('secret-modal');
+            modal.classList.add('pointer-events-none', 'opacity-0');
+        }
+
+        function submitSecretCode() {
+            const val = document.getElementById('secret-code-input').value.trim().toUpperCase();
+            if (val === 'COFFEESHOP.' || val === 'COFFEESHOP') {
+                isVipUnlocked = true;
+                document.getElementById('vip-badge').classList.remove('hidden');
+                document.getElementById('secret-error').classList.add('hidden');
+                closeSecretModal();
+                renderStrainList();
+                alert("🔓 GEHEIM ONTGRENDELD! VIP Backroom soorten toegevoegd!");
+            } else {
+                document.getElementById('secret-error').classList.remove('hidden');
+            }
+        }
+
+        /* ====================================================
+           6. SIMULATOR MECHANICS & COUGH ATTACK
+           ==================================================== */
+        function setMethod(method) {
+            currentMethod = method;
+            ['joint', 'bong', 'vape', 'custom'].forEach(m => {
+                const btn = document.getElementById(`btn-method-${m}`);
+                if (btn) {
+                    if (m === method) btn.className = "px-3 py-1 rounded-lg bg-weed-500 text-slate-950 font-bold transition";
+                    else btn.className = "px-3 py-1 rounded-lg text-slate-400 hover:text-white transition";
+                }
+            });
+            updateDeviceGraphic();
+        }
+
+        function updateDeviceGraphic() {
+            const container = document.getElementById('device-graphic');
+            
+            if (currentMethod === 'joint' || currentMethod === 'custom') {
+                const paperCol = currentMethod === 'custom' ? rollState.paperColor : '#f8fafc';
+                container.innerHTML = `
+                    <div class="relative flex items-center justify-center">
+                        <svg width="240" height="40" viewBox="0 0 240 40" fill="none" class="drop-shadow-lg">
+                            <rect x="10" y="12" width="40" height="16" rx="2" fill="#d97706" />
+                            <line x1="20" y1="12" x2="20" y2="28" stroke="#b45309" stroke-width="2"/>
+                            <path d="M50 12 L210 8 L210 32 L50 28 Z" fill="${paperCol}" opacity="0.9" />
+                            <ellipse id="joint-cherry" cx="212" cy="20" rx="4" ry="11" fill="#ef4444" />
+                            <ellipse id="joint-glow" cx="212" cy="20" rx="2" ry="8" fill="#fbbf24" />
+                        </svg>
+                    </div>
+                `;
+            } else if (currentMethod === 'bong') {
+                container.innerHTML = `
+                    <div class="relative flex items-center justify-center">
+                        <svg width="140" height="180" viewBox="0 0 140 180" fill="none">
+                            <path d="M45 20 L45 90 L15 150 A 40 40 0 0 0 125 150 L95 90 L95 20 Z" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+                            <path d="M25 140 A 35 35 0 0 0 115 140 L102 120 L38 120 Z" fill="rgba(6, 182, 212, 0.4)"/>
+                            <line x1="85" y1="95" x2="55" y2="135" stroke="rgba(255,255,255,0.6)" stroke-width="4"/>
+                            <circle id="bong-bowl" cx="92" cy="88" r="8" fill="${currentStrain.color}"/>
+                        </svg>
+                    </div>
+                `;
+            } else if (currentMethod === 'vape') {
+                container.innerHTML = `
+                    <div class="relative flex items-center justify-center">
+                        <svg width="80" height="160" viewBox="0 0 80 160" fill="none">
+                            <rect x="20" y="40" width="40" height="110" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                            <rect x="32" y="10" width="16" height="30" rx="4" fill="#0f172a" />
+                            <rect x="28" y="60" width="24" height="30" rx="4" fill="#0284c7" opacity="0.8"/>
+                            <text x="40" y="78" font-size="9" fill="#ffffff" text-anchor="middle">210°C</text>
+                            <circle cx="40" cy="125" r="5" fill="${currentStrain.color}" />
+                        </svg>
+                    </div>
+                `;
+            }
+        }
+
+        const inhaleBtn = document.getElementById('inhale-btn');
+        const breathIndicator = document.getElementById('breath-indicator');
+        const breathFill = document.getElementById('breath-fill');
+
+        function startInhale() {
+            if (isInhaling) return;
+            isInhaling = true;
+            inhaleStartTime = Date.now();
+            breathIndicator.style.opacity = '1';
+            
+            if (currentMethod === 'bong') playBongSFX();
+            else playInhaleSFX();
+
+            inhaleTimer = setInterval(() => {
+                const duration = (Date.now() - inhaleStartTime) / 1000;
+                
+                if (duration > 3.5) {
+                    triggerCoughAttack();
+                    return;
+                }
+
+                inhaleProgress = Math.min(100, (duration / 3.5) * 100);
+                breathFill.style.width = `${inhaleProgress}%`;
+                spawnDeviceSmoke();
+            }, 50);
+        }
+
+        function stopInhale() {
+            if (!isInhaling) return;
+            isInhaling = false;
+            breathIndicator.style.opacity = '0';
+            clearInterval(inhaleTimer);
+
+            const duration = (Date.now() - inhaleStartTime) / 1000;
+            if (duration <= 3.5) {
+                playExhaleSFX();
+                const addedHigh = Math.floor(inhaleProgress / 3.5);
+                increaseHighness(addedHigh);
+                exhaleSmokeBurst(inhaleProgress);
+            }
+
+            inhaleProgress = 0;
+            breathFill.style.width = '0%';
+        }
+
+        function triggerCoughAttack() {
+            isInhaling = false;
+            clearInterval(inhaleTimer);
+            breathIndicator.style.opacity = '0';
+            
+            playCoughSFX();
+
+            const card = document.getElementById('simulator-card');
+            const overlay = document.getElementById('cough-overlay');
+            
+            card.classList.add('cough-shake');
+            overlay.style.opacity = '1';
+
+            exhaleSmokeBurst(100);
+
+            setTimeout(() => {
+                card.classList.remove('cough-shake');
+                overlay.style.opacity = '0';
+            }, 1800);
+        }
+
+        inhaleBtn.addEventListener('mousedown', startInhale);
+        inhaleBtn.addEventListener('mouseup', stopInhale);
+        inhaleBtn.addEventListener('mouseleave', stopInhale);
+        inhaleBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startInhale(); });
+        inhaleBtn.addEventListener('touchend', (e) => { e.preventDefault(); stopInhale(); });
+
+        function increaseHighness(amount) {
+            highnessLevel = Math.min(100, highnessLevel + amount);
+            document.getElementById('high-percent').innerText = `${highnessLevel}%`;
+            document.getElementById('high-bar').style.width = `${highnessLevel}%`;
+            applyTrippyEffects();
+        }
+
+        document.getElementById('sober-btn').addEventListener('click', () => {
+            highnessLevel = 0;
+            document.getElementById('high-percent').innerText = `0%`;
+            document.getElementById('high-bar').style.width = `0%`;
+            document.getElementById('app-body').style.filter = 'none';
+        });
+
+        function applyTrippyEffects() {
+            const body = document.getElementById('app-body');
+            if (highnessLevel > 40) {
+                const hue = (highnessLevel - 40) * 2;
+                body.style.filter = `contrast(108%) hue-rotate(${hue}deg) saturate(${100 + highnessLevel * 0.5}%)`;
+            } else {
+                body.style.filter = 'none';
+            }
+        }
+
+        /* ====================================================
+           7. CANVAS 2D SMOKE ENGINE
+           ==================================================== */
+        let canvas, ctx, particles = [];
+
+        function initSmokeCanvas() {
+            canvas = document.getElementById('smokeCanvas');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                if (Math.random() < 0.25) {
+                    particles.push(new SmokeParticle(mouseX, mouseY, Math.random() * 1.5 - 0.75, -0.5, Math.random() * 15 + 10));
+                }
+            });
+
+            requestAnimationFrame(animateSmoke);
+        }
+
+        function resizeCanvas() {
+            if (!canvas || !canvas.parentElement) return;
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+
+        class SmokeParticle {
+            constructor(x, y, vx, vy, radius) {
+                this.x = x; this.y = y; this.vx = vx; this.vy = vy;
+                this.radius = radius; this.alpha = 0.45; this.growth = Math.random() * 0.3 + 0.1;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy; this.radius += this.growth; this.alpha -= 0.0035;
+            }
+            draw() {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(230, 235, 245, ${Math.max(0, this.alpha)})`;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = currentStrain.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function spawnDeviceSmoke() {
+            if (!canvas) return;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2 - 20;
+            particles.push(new SmokeParticle(centerX, centerY, Math.random() * 2 - 1, -Math.random() * 2 - 1, Math.random() * 10 + 8));
+        }
+
+        function exhaleSmokeBurst(intensity) {
+            if (!canvas) return;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2 + 50;
+            const count = Math.floor(intensity * 0.9);
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 3.5 + 1;
+                particles.push(new SmokeParticle(centerX, centerY, Math.cos(angle) * speed, Math.sin(angle) * speed - 1.5, Math.random() * 22 + 15));
+            }
+        }
+
+        function animateSmoke() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].alpha <= 0 || particles[i].radius > 120) particles.splice(i, 1);
+            }
+            requestAnimationFrame(animateSmoke);
+        }
+
+        /* ====================================================
+           8. DRAAI STUDIO LOGIC
+           ==================================================== */
+        function selectPaper(name, color) {
+            rollState.paperName = name;
+            rollState.paperColor = color;
+            advanceRollStep(2, "Stap 2/5: Tip Rollen", "Mooie keuze! Rol nu een stevig tippetje.");
+            document.getElementById('roll-step-1').classList.add('hidden');
+            document.getElementById('roll-step-2').classList.remove('hidden');
+        }
+
+        function rollTipStyle(style) {
+            rollState.tipStyle = style;
+            const visual = document.getElementById('tip-visual');
+            visual.innerText = style === 'M-Tip' ? 'M' : '@';
+            advanceRollStep(3, "Stap 3/5: Wiet Grinden", `Tijd om je ${currentStrain.name} te malen!`);
+            document.getElementById('roll-step-2').classList.add('hidden');
+            document.getElementById('roll-step-3').classList.remove('hidden');
+        }
+
+        function grindWeedAnimation() {
+            const disc = document.getElementById('grinder-disc');
+            disc.classList.add('animate-grind');
+            setTimeout(() => {
+                disc.classList.remove('animate-grind');
+                rollState.isGround = true;
+                advanceRollStep(4, "Stap 4/5: Vullen & Verdelen", "Verdeel de gemalen mix netjes over je vloeitje.");
+                document.getElementById('roll-step-3').classList.add('hidden');
+                document.getElementById('roll-step-4').classList.remove('hidden');
+            }, 1200);
+        }
+
+        function spreadMix() {
+            const mix = document.getElementById('paper-weed-mix');
+            mix.style.opacity = '1';
+            setTimeout(() => {
+                advanceRollStep(5, "Stap 5/5: Dichtrollen & Aansteken", "Dichtgerold! Steek je joint aan.");
+                document.getElementById('roll-step-4').classList.add('hidden');
+                document.getElementById('roll-step-5').classList.remove('hidden');
+            }, 800);
+        }
+
+        function lightJoint() {
+            const fire = document.getElementById('joint-fire');
+            fire.style.opacity = '1';
+            
+            const customBtn = document.getElementById('btn-method-custom');
+            customBtn.classList.remove('hidden');
+            setMethod('custom');
+
+            setTimeout(() => {
+                switchTab('lounge');
+            }, 1000);
+        }
+
+        function advanceRollStep(stepNum, badgeText, statusText) {
+            rollState.step = stepNum;
+            document.getElementById('roll-step-badge').innerText = badgeText;
+            document.getElementById('roll-status-text').innerText = statusText;
+        }
+
+        function resetRollStudio() {
+            rollState.step = 1;
+            advanceRollStep(1, "Stap 1/5: Vloei Kiezen", "Kies je vloeitje.");
+            document.getElementById('roll-step-1').classList.remove('hidden');
+            document.getElementById('roll-step-2').classList.add('hidden');
+            document.getElementById('roll-step-3').classList.add('hidden');
+            document.getElementById('roll-step-4').classList.add('hidden');
+            document.getElementById('roll-step-5').classList.add('hidden');
+        }
+
+        /* ====================================================
+           9. SUPERMARKT & MAGNETRON LOGIC
+           ==================================================== */
+        function renderMarketProducts(category = 'all') {
+            activeMarketCategory = category;
+            const grid = document.getElementById('market-products-grid');
+            const filtered = category === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.category === category);
+
+            ['all', 'drinks', 'snacks', 'meals'].forEach(c => {
+                const btn = document.getElementById(`mcat-${c}`);
+                if (c === category) btn.className = "px-3.5 py-1.5 rounded-xl bg-weed-500 text-slate-950 font-bold whitespace-nowrap shadow";
+                else btn.className = "px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 whitespace-nowrap";
+            });
+
+            grid.innerHTML = filtered.map(p => `
+                <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition shadow">
+                    <div>
+                        <div class="text-3xl text-center my-2">${p.icon}</div>
+                        <h4 class="font-bold text-xs text-slate-200 text-center mb-1 truncate">${p.name}</h4>
+                        <span class="text-[10px] text-amber-400 font-bold block text-center mb-2">€${p.price.toFixed(2)}</span>
+                    </div>
+                    <div class="space-y-1">
+                        <button onclick="buyProduct('${p.id}')" class="w-full py-1.5 rounded-xl bg-weed-500 hover:bg-weed-400 text-slate-950 font-bold text-xs transition shadow">
+                            Kopen
+                        </button>
+                        ${p.isMicrowaveable ? `
+                            <button onclick="selectForMicrowave('${p.id}')" class="w-full py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] transition border border-slate-700">
+                                In Magnetron
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterMarket(cat) {
+            renderMarketProducts(cat);
+        }
+
+        function addMoney() {
+            userMoney += 10.00;
+            document.getElementById('user-money').innerText = `€${userMoney.toFixed(2)}`;
+        }
+
+        function buyProduct(id) {
+            const prod = PRODUCTS.find(p => p.id === id);
+            if (userMoney >= prod.price) {
+                userMoney -= prod.price;
+                document.getElementById('user-money').innerText = `€${userMoney.toFixed(2)}`;
+                
+                if (prod.soundType === 'drink') playDrinkSFX();
+                else playEatSFX();
+
+                munchieSatisfaction = Math.min(100, munchieSatisfaction + prod.satisfaction);
+                document.getElementById('munchie-level-text').innerText = `${munchieSatisfaction}%`;
+                document.getElementById('munchie-bar').style.width = `${munchieSatisfaction}%`;
+            } else {
+                alert("Niet genoeg geld! Klik op + €10.00 Pinnen.");
+            }
+        }
+
+        function selectForMicrowave(id) {
+            selectedMicrowaveItem = PRODUCTS.find(p => p.id === id);
+            document.getElementById('micro-food-item').innerText = selectedMicrowaveItem.icon;
+            playMicrowaveBeep();
+        }
+
+        function setMicroTime(sec) {
+            if (isMicrowaveRunning) return;
+            playMicrowaveBeep();
+            microTimerSeconds += sec;
+            updateMicrowaveDisplay();
+        }
+
+        function updateMicrowaveDisplay() {
+            const mins = Math.floor(microTimerSeconds / 60).toString().padStart(2, '0');
+            const secs = (microTimerSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('micro-timer').innerText = `${mins}:${secs}`;
+        }
+
+        function startMicrowave() {
+            if (isMicrowaveRunning || microTimerSeconds <= 0) return;
+            isMicrowaveRunning = true;
+            playMicrowaveBeep();
+
+            const light = document.getElementById('micro-light');
+            const food = document.getElementById('micro-food-item');
+            const steam = document.getElementById('micro-steam');
+            const btn = document.getElementById('micro-start-btn');
+
+            light.style.opacity = '1';
+            food.classList.add('microwave-plate-spin');
+            btn.innerText = 'BZZZ...';
+
+            microInterval = setInterval(() => {
+                microTimerSeconds--;
+                updateMicrowaveDisplay();
+
+                if (microTimerSeconds <= 0) {
+                    clearInterval(microInterval);
+                    isMicrowaveRunning = false;
+                    light.style.opacity = '0';
+                    food.classList.remove('microwave-plate-spin');
+                    btn.innerText = 'START';
+                    microTimerSeconds = 30;
+                    updateMicrowaveDisplay();
+
+                    playMicrowavePing();
+                    steam.style.opacity = '1';
+                    setTimeout(() => steam.style.opacity = '0', 2500);
+
+                    munchieSatisfaction = Math.min(100, munchieSatisfaction + selectedMicrowaveItem.satisfaction);
+                    document.getElementById('munchie-level-text').innerText = `${munchieSatisfaction}%`;
+                    document.getElementById('munchie-bar').style.width = `${munchieSatisfaction}%`;
+                }
+            }, 1000);
+        }
+
+        /* ====================================================
+           10. THEMES & AMBIENT AUDIO
+           ==================================================== */
+        function setTheme(theme) {
+            const body = document.getElementById('app-body');
+            body.className = "text-slate-100 font-sans min-h-screen flex flex-col transition-all duration-500 overflow-x-hidden ";
+            if (theme === 'cosmic') body.classList.add('bg-cosmic');
+            else if (theme === 'coffeeshop') body.classList.add('bg-coffeeshop');
+            else if (theme === 'sunset') body.classList.add('bg-sunset');
+            else if (theme === 'lofi') body.classList.add('bg-lofi');
+        }
+
+        let ambientOsc = null, isAmbientActive = false;
+        document.getElementById('toggle-audio-btn').addEventListener('click', () => {
+            const ctx = getAudioContext();
+            if (!isAmbientActive) {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(174, ctx.currentTime);
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start();
+                ambientOsc = osc;
+                isAmbientActive = true;
+                document.getElementById('toggle-audio-btn').innerHTML = '<i class="fa-solid fa-pause text-xs"></i>';
+            } else {
+                if (ambientOsc) ambientOsc.stop();
+                isAmbientActive = false;
+                document.getElementById('toggle-audio-btn').innerHTML = '<i class="fa-solid fa-play text-xs"></i>';
+            }
+        });
+
+        function generateThought() {
+            const random = THOUGHTS[Math.floor(Math.random() * THOUGHTS.length)];
+            document.getElementById('thought-text').innerText = `"${random}"`;
+        }
+    </script>
+</body>
+</html>
